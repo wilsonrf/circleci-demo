@@ -42,7 +42,7 @@ jobs:
       - run: gradle test
       - run: gradle build
       - store_artifacts:
-        - path: "build/libs/&.jar"
+          path: build/libs/app.jar
   deploy:
     docker:
       # specify the version you desire here
