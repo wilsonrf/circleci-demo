@@ -46,6 +46,7 @@ jobs:
       # run tests
       - run: gradle build
       - persist_to_workspace:
+          root: .
           path: build/libs/app.jar
   deploy:
     docker:
@@ -54,7 +55,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - attach_workspace:
-        at: workspace
+        at: .
       - run:
           name: Setup AWS credentials
           command: |
@@ -64,7 +65,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             ts=`date +%s`
-            aws s3 cp build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws s3 cp workspace/build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
             aws elasticbeanstalk create-application-version \
               --application-name $EB_APP_NAME \
               --version-label "$ts" \
