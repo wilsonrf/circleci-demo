@@ -43,7 +43,7 @@ jobs:
   deploy:
     docker:
       # specify the version you desire here
-      - image: wilsonrf/aws-cli:latest
+      - image: wilsonrf/aws-cli:1.0.0
     working_directory: ~/repo
     steps:
       - checkout
