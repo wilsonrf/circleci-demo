@@ -35,7 +35,8 @@ jobs:
       - run: gradle build
       - persist_to_workspace:
           root: build
-          path: libs/app.jar
+          paths: 
+            - libs/app.jar
   deploy:
     <<: *defaults
     docker:
