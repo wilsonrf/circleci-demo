@@ -32,9 +32,13 @@ jobs:
     working_directory: ~/repo
     docker:
       # specify the version you desire here
-      - image: heroku/heroku:16
+      - image: node:9-alpine
     steps:
       - checkout
+      - run:
+          name: Install heroku-cli
+          command: |
+            npm install -g heroku-cli
       - run:
           name: Deploy to Heroku
           command: |

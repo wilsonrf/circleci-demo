@@ -1,8 +1,3 @@
-FROM alpine:edge
+FROM node:9-alpine
 
-RUN apk update && apk add python \ 
-    py-pip \
-    py2-pip \
-    bash
-
-RUN pip install pip awscli --upgrade
+RUN npm install -g heroku-cli
