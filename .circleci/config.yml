@@ -44,6 +44,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # run tests!
+      - run: mkdir workspace
       - run: gradle test
       - run: gradle build
       - persist_to_workspace:
