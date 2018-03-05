@@ -2,13 +2,10 @@
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
-defaults: &defaults
-  working_directory: ~/repo
-
 version: 2
 jobs:
   build:
-    <<: *defaults
+    working_directory: ~/repo
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
@@ -32,7 +29,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
       - run: gradle build
   deploy:
-    <<: *defaults
+    working_directory: ~/repo
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
