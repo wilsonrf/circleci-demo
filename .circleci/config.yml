@@ -32,11 +32,10 @@ jobs:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
-      - run: mkdir workspace
       - run: gradle build
       - persist_to_workspace:
-          root: workspace
-          path: build/libs/app.jar
+          root: build
+          path: libs/app.jar
   deploy:
     <<: *defaults
     docker:
@@ -54,7 +53,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             ts=`date +%s`
-            aws s3 cp workspace/build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws s3 cp build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
             aws elasticbeanstalk create-application-version \
               --application-name $EB_APP_NAME \
               --version-label "$ts" \
