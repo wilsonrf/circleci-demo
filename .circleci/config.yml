@@ -4,8 +4,6 @@
 #
 defaults: &defaults
   working_directory: ~/repo
-  docker:
-    - image: wilsonrf/aws-cli:1.0.2
 
 version: 2
 jobs:
@@ -33,37 +31,27 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
       - run: gradle build
-      - persist_to_workspace:
-          root: ~/repo
-          paths: 
-            - build/libs/app.jar
   deploy:
     <<: *defaults
     docker:
       # specify the version you desire here
-      - image: wilsonrf/aws-cli:1.0.2
+      - image: circleci/openjdk:8-jdk
     steps:
-      - attach_workspace:
-          at: ~/repo
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "72:bb:d6:49:bb:e8:ba:8d:01:fe:4e:90:d7:93:b3:32"
       - run:
-          name: Setup AWS credentials
+          name: Run Setup Script
+          command: bash .circleci/deploy-heroku.sh
+      - run:
+          name: Deploy to Heroku
           command: |
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - deploy:
-          name: Deploy to Elastic Beanstalk
-          command: |
-            ts=`date +%s`
-            aws s3 cp build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
-            aws elasticbeanstalk create-application-version \
-              --application-name $EB_APP_NAME \
-              --version-label "$ts" \
-              --description "$EB_APP_NAME-$ts" \
-              --source-bundle S3Bucket="$S3_BUCKET",S3Key="$S3_KEY/$EB_APP_NAME-$ts.jar"
-            aws elasticbeanstalk update-environment \
-              --application-name $EB_APP_NAME \
-              --environment-name $EB_APP_ENV \
-              --version-label "$ts"
+            heroku git:remote -a $HEROKU_APP_NAME
+            git push --force git@heroku.com:$HEROKU_APP_NAME.git HEAD:refs/heads/master
+            heroku run python manage.py deploy
+            heroku restart
+            
 workflows:
   version: 2
   build-deploy:
