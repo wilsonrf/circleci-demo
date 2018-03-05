@@ -2,6 +2,11 @@
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
+defaults: &defaults
+  working_directory: /artifact
+  docker:
+    - image: wilsonrf/aws-cli:1.0.2
+
 version: 2
 jobs:
   build:
@@ -41,7 +46,8 @@ jobs:
       # run tests!
       - run: gradle test
       - run: gradle build
-      - store_artifacts:
+      - persist_to_workspace:
+          root: workspace
           path: build/libs/app.jar
   deploy:
     docker:
@@ -49,7 +55,8 @@ jobs:
       - image: wilsonrf/aws-cli:1.0.2
     working_directory: ~/repo
     steps:
-      - checkout
+      - attach_workspace:
+        at: /artifact/workspace
       - run:
           name: Setup AWS credentials
           command: |
@@ -59,7 +66,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             ts=`date +%s`
-            aws s3 cp ~/repo/build/libs/*.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws s3 cp /artifact/workspace/build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
             aws elasticbeanstalk create-application-version \
               --application-name $EB_APP_NAME \
               --version-label "$ts" \
