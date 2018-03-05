@@ -44,7 +44,7 @@ jobs:
       - image: wilsonrf/aws-cli:1.0.2
     steps:
       - attach_workspace:
-          at: build
+          at: ~/repo/build
       - run:
           name: Setup AWS credentials
           command: |
