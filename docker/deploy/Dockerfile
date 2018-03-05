@@ -4,5 +4,5 @@ RUN apk update && apk add python \
     py-pip \
     py2-pip \
     bash
-    
-RUN pip install --upgrade pip awscli awsebcli
+
+RUN pip install pip awscli --upgrade

@@ -50,12 +50,22 @@ jobs:
       - run:
           name: Setup AWS credentials
           command: |
-            mkdir ~/.aws && printf "[profile eb-cli]\naws_access_key_id = ${AWS_ACCESS_KEY_ID}\naws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}" > ~/.aws/config
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - deploy:
           name: Deploy to Elastic Beanstalk
           command: |
-            eb init --profile eb-cli
-            eb deploy currency-converter
+            ts=`date +%s`
+            aws s3 cp ~/repo/build/libs/*.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws elasticbeanstalk create-application-version \
+              --application-name $EB_APP_NAME \
+              --version-label "$ts" \
+              --description "$EB_APP_NAME-$ts" \
+              --source-bundle S3Bucket="$S3_BUCKET",S3Key="$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws elasticbeanstalk update-environment \
+              --application-name $EB_APP_NAME \
+              --environment-name $EB_APP_ENV \
+              --version-label "$ts"
 workflows:
   version: 2
   build-deploy:
