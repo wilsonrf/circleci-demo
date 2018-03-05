@@ -44,7 +44,7 @@ jobs:
       - image: wilsonrf/aws-cli:1.0.2
     steps:
       - attach_workspace:
-        at: .
+        at: build
       - run:
           name: Setup AWS credentials
           command: |
@@ -54,7 +54,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             ts=`date +%s`
-            aws s3 cp build/libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
+            aws s3 cp libs/app.jar "s3://$S3_BUCKET/$S3_KEY/$EB_APP_NAME-$ts.jar"
             aws elasticbeanstalk create-application-version \
               --application-name $EB_APP_NAME \
               --version-label "$ts" \
